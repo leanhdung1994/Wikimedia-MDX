@@ -13,6 +13,19 @@ Processes the full English Wikipedia dump — roughly 500 GB of uncompressed HTM
 - **DuckDB-backed intermediate storage** – chunked Parquet files are merged with DuckDB for low memory overhead
 - **MDX output** – produces `.mdx`, `.css`, `.js`, and module files consumable by MDict-compatible readers
 
+## Screenshots
+
+<p align="center">
+  <img alt="Light" src="./screenshots/PDE.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="./screenshots/Paris.png" width="45%">
+</p>
+<p align="center">
+  <img alt="Light" src="./screenshots/Duoprism.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="./screenshots/Python.png" width="45%">
+</p>
+
 ## Requirements
 
 - Python 3.11+
