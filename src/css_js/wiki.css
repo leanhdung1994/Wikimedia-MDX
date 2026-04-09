@@ -1,0 +1,23 @@
+/* User-defined style */
+p {
+    text-align: justify;
+}
+
+/* Click to hide/show references */
+section[data-collapsed]> :not(h2) {
+    display: none;
+}
+
+.toggle-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    user-select: none;
+    cursor: pointer;
+    font-size: 0.7em;
+    margin-right: 8px;
+}
+
+.toggle-arrow.collapsed {
+    transform: rotate(-90deg);
+    /* ▼ becomes ◀ */
+}

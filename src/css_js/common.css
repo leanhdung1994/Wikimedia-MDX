@@ -1,0 +1,184 @@
+/* TOC collapse toggle */
+.toctogglecheckbox:checked~ul {
+    display: none;
+}
+
+/* Specificity fix: beats #toc:hover > ul so [hide] works while hovering */
+#toc .toctogglecheckbox:checked~ul {
+    display: none !important;
+}
+
+.toctogglecheckbox {
+    display: inline !important;
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+}
+
+.toctogglespan::before {
+    content: ' [';
+}
+
+.toctogglespan::after {
+    content: ']';
+}
+
+.toctogglelabel {
+    color: #0645ad;
+    cursor: pointer;
+    font-size: 94%;
+}
+
+.toctogglelabel:hover {
+    text-decoration: underline;
+}
+
+.toctogglecheckbox:not(:checked)+.toctitle .toctogglelabel::after {
+    content: 'hide';
+}
+
+.toctogglecheckbox:checked+.toctitle .toctogglelabel::after {
+    content: 'show';
+}
+
+/* ── Sticky TOC (commit 7066b97) ──────────────────────────────── */
+/* Bypass toclimit wrapper so sticky positioning is not broken */
+div[class*="toclimit-"],
+div.tocright {
+    display: contents;
+}
+
+/* Collapsed state: .toctitle fills the 32×32 box and centers the icon */
+#toc .toctitle,
+.toc .toctitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    border-bottom: none;
+}
+
+/* Icon (📑) — sized to fit the 32×32 box */
+#toc .toctitle h2,
+.toc .toctitle h2 {
+    display: block;
+    font-size: 18px;
+    line-height: 32px;
+    width: 32px;
+    text-align: center;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Hide list in collapsed state; shown only on hover via absolute positioning */
+#toc>ul,
+.toc>ul {
+    display: none;
+}
+
+/* Collapsed 32×32 icon, fixed to top-right of viewport */
+#toc,
+.toc {
+    position: sticky;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    opacity: 0.7;
+    background-color: #f8f9fa;
+    border: 1px solid #a2a9b1;
+    border-radius: 4px;
+    transition: opacity 0.3s ease-in-out;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover: expand */
+#toc:hover,
+.toc:hover {
+    overflow: visible;
+    opacity: 1;
+}
+
+/* Title and list fly out as absolute overlay */
+#toc:hover .toctitle,
+#toc:hover>ul {
+    display: block;
+    position: absolute;
+    right: 0;
+    width: 280px;
+    background-color: #ffffff;
+    border: 1px solid #a2a9b1;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+#toc:hover .toctitle {
+    /* Override collapsed sizing — let the panel dictate dimensions */
+    display: block;
+    width: 280px;
+    height: auto;
+    top: 0;
+    z-index: 1001;
+    padding: 8px;
+    border-radius: 4px 4px 0 0;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    /* Restore sticky heading style */
+    position: -webkit-sticky;
+    position: sticky;
+    background-color: inherit;
+}
+
+#toc:hover>ul {
+    top: 35px;
+    margin: 0;
+    padding: 8px;
+    max-height: 75vh;
+    overflow-y: auto;
+    border-radius: 0 0 4px 4px;
+}
+
+#toc ul li {
+    padding: 2px 0;
+    transition: background-color 0.2s;
+}
+
+#toc ul li:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Print: reset sticky back to normal flow */
+@media print {
+
+    #toc,
+    .toc {
+        position: static !important;
+        float: none !important;
+        right: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        opacity: 1 !important;
+        box-shadow: none !important;
+        border: 1px solid #aaa !important;
+        margin: 1em 0 !important;
+    }
+
+    #toc .toctitle,
+    .toc .toctitle {
+        position: static !important;
+    }
+
+    div[class*="toclimit-"],
+    div.tocright {
+        display: block !important;
+        float: none !important;
+    }
+}

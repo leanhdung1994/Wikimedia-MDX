@@ -1,0 +1,38 @@
+/* User-defined style */
+p {
+    text-align: justify;
+}
+
+h3,
+h4,
+h5 {
+    display: inline;
+    cursor: pointer;
+}
+
+h3 {
+    color: #0069B4;
+    font-weight: bold;
+}
+
+h4 {
+    color: #db8c39;
+    font-weight: bold;
+}
+
+h5 {
+    color: #E15A25;
+    font-weight: bold;
+}
+
+.ib-content {
+    color: teal;
+}
+
+dd {
+    color: #369;
+}
+
+.mention {
+    color: #369;
+}
