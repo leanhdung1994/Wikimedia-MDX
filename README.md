@@ -163,3 +163,9 @@ Rather than hard-coding Wikimedia CSS module names, the pipeline extracts the ac
 ### Fault-tolerant entry processing and debug mode
 
 Individual entry failures never abort a worker or stall the pipeline. Each entry is processed inside a `try/except`; any exception is printed for immediate visibility, and the raw JSON line is collected. Once an NDJSON file is fully processed, any failed lines are written out together to a `failed_{prefix}_{ndjson_name}` sidecar file in the output directory. The `--debug` flag complements this by limiting processing to the first 2 NDJSON files, making it fast to validate the full pipeline end-to-end on a small slice of real data.
+
+---
+
+## Acknowledgement
+
+Many thanks to LE Quynh Anh for encouragement and support.
