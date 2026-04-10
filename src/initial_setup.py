@@ -38,7 +38,7 @@ def initial_setup(cfg: Config) -> None:
     if not cfg.index_gzip_path.exists():
         start = time.perf_counter()
         print()
-        print(f"===== Generate index of {cfg.tar_name} =====")
+        print(f"===== Generate index of {cfg.tar_path} =====")
 
         command = [
             cfg.rapidgzip_exe_path,
