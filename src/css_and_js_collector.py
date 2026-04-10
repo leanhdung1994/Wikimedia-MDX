@@ -10,6 +10,8 @@ headers = {
     "Connection": "keep-alive",
 }
 
+# Section heading IDs whose parent sections are hidden by the bundled JS.
+# Keyed by project → language.
 JS_selectors = {
     "wiki": {
         "en": [
@@ -73,29 +75,61 @@ JS_selectors = {
 
 
 def split_modules(lst, n):
+    """Splits a flat list into chunks of size n for batched URL requests."""
     tmp = [lst[i : i + n] for i in range(0, len(lst), n)]
     return tmp
 
 
 def split_points() -> list:
+    """
+    Delimiters used to parse and reconstruct Wikimedia load.php module URLs.
+    Format: …?lang=en&modules=module1%7Cmodule2&only=styles&…
+    """
     return ["&modules=", "%7C", "&"]
 
 
 def process_module_url(module_url: str) -> list:
+    """
+    Extracts individual module names from a load.php URL.
+    Example input:  '…&modules=ext.cite.styles%7Cmediawiki.legacy.shared&only=…'
+    Example output: ['ext.cite.styles', 'mediawiki.legacy.shared']
+    """
     splits = split_points()
-    modules = module_url.split(splits[0], 1)[1]
-    modules = modules.split(splits[2], 1)[0]
-    modules = modules.split(splits[1])
+    modules = module_url.split(splits[0], 1)[1]  # Everything after '&modules='
+    modules = modules.split(splits[2], 1)[0]  # Drop query params after the next '&'
+    modules = modules.split(splits[1])  # Split on URL-encoded '|'
     return modules
 
 
 class CssJsFactory:
+    """
+    Downloads and assembles the CSS and JS files bundled into the final MDX.
+
+    CSS strategy:
+      1. Collect every unique module name from the modules.parquet file.
+      2. Batch them into groups of 20 and fetch from Wikimedia's load.php endpoint.
+      3. Append local override CSS files from css_js/ (common, project, lang_project).
+
+    JS strategy:
+      Concatenate local JS files from css_js/ and inject the section-hiding
+      selector list (JS_selectors) for wiki projects.
+    """
+
     def __init__(self, cfg: Config):
         self.cfg = cfg
         self.con = duckdb.connect()
-        self.base_dir = Path(__file__).parent / "css_js"
+        self.base_dir = (
+            Path(__file__).parent / "css_js"
+        )  # Directory of local CSS/JS files
 
     def base_begin_end_url(self) -> list:
+        """
+        Reads one sample row from modules.parquet to decompose the load.php URL into:
+          base_url   — e.g. 'https://en.wiktionary.org'
+          begin_url  — everything up to and including '&modules='
+          end_url    — the trailing query parameters after the module list
+        These are reassembled when constructing batched fetch URLs.
+        """
         splits = split_points()
         export_query = f"""
                         SELECT base_url, module_url
@@ -114,6 +148,11 @@ class CssJsFactory:
         return [base_url, begin_url, end_url]
 
     def collect_modules(self) -> list:
+        """
+        Reads all module_url values from modules.parquet, parses each into individual
+        module names, and returns the deduplicated union as a list.
+        Fetched in batches of 100k rows to limit peak memory usage.
+        """
         all_modules = set()
         export_query = f"""
                         SELECT module_url
@@ -128,6 +167,12 @@ class CssJsFactory:
         return list(all_modules)
 
     def collect_css(self, export_csslink=False) -> None:
+        """
+        Fetches CSS for all wiki modules in batches of 20, then appends local overrides.
+        A 2-second delay between requests is a polite rate limit for Wikimedia's servers.
+        Writes the combined CSS to cfg.css_path.
+        Optionally writes the list of fetched URLs to cfg.csslink_path for debugging.
+        """
         print()
         print("===== Generate CSS and JS =====")
 
@@ -147,13 +192,15 @@ class CssJsFactory:
                 modules.append(response.text)
             else:
                 modules.append("ERROR!")
-            time.sleep(2)
+            time.sleep(2)  # Rate-limit requests to Wikimedia
 
         input_css_paths = [
             self.base_dir / "common.css",
             self.base_dir / f"{self.cfg.project_code}.css",
             self.base_dir / f"{self.cfg.lang_proj}.css",
         ]
+
+        # Append local CSS overrides in order: common → project → lang_project
         for path in input_css_paths:
             if path.is_file():
                 tmp = path.read_text(encoding="utf-8")
@@ -167,6 +214,11 @@ class CssJsFactory:
             self.cfg.csslink_path.write_text(data, encoding="utf-8")
 
     def collect_js(self) -> None:
+        """
+        Concatenates local JS files (common → project → lang_project) and, for wiki
+        projects, injects the language-specific list of section IDs to hide by
+        replacing the "REPLACETHIS" placeholder in the JS template.
+        """
         input_js_paths = [
             self.base_dir / "common.js",
             self.base_dir / f"{self.cfg.project_code}.js",
@@ -187,11 +239,17 @@ class CssJsFactory:
         self.cfg.js_path.write_text(data, encoding="utf-8")
 
     def delete_parquet(self):
+        """Removes the modules parquet file once CSS/JS generation is complete."""
         if self.cfg.modules_path.is_file():
             self.cfg.modules_path.unlink(missing_ok=True)
 
 
 def collect_css_and_js(cfg: Config, delete_parquet=False) -> None:
+    """
+    Entry point called from main(). Guards against running if:
+      - Some ndjson shards are still unprocessed (modules would be incomplete).
+      - The modules parquet file doesn't exist.
+    """
     if cfg.ndjson_names_left:
         return
     elif not cfg.modules_path.is_file():
