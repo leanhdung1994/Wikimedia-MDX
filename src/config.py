@@ -7,7 +7,7 @@ from itertools import chain
 from dataclasses import dataclass
 from urllib.parse import urljoin
 from multiprocessing import Queue
-import json, tarfile, time, string, orjson, traceback, requests, rapidgzip, os, subprocess, argparse, shutil, duckdb, atexit, psutil, threading
+import json, tarfile, time, string, orjson, traceback, requests, rapidgzip, os, subprocess, argparse, shutil, duckdb, atexit, psutil, threading, sys
 
 
 @dataclass()
@@ -21,8 +21,6 @@ class Config:
     buffer_size: int
     input_dir: Path
     output_dir: Path
-    rapidgzip_exe_path: Path
-    mdict_exe_path: Path
 
     @property
     def mode_prefix(self):
@@ -39,7 +37,7 @@ class Config:
             return "Français"
 
     def __post_init__(self):
-        self.dont_do_it = True
+        self.dont_do_it = False
         if self.debug:
             self.n_cores = 2
 

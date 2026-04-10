@@ -2,6 +2,20 @@ from config import *
 
 
 def initial_setup(cfg: Config) -> None:
+    scripts = "Scripts" if sys.platform == "win32" else "bin"
+    suffix = ".exe" if sys.platform == "win32" else ""
+    parent = Path(sys.executable).parent / scripts
+    cfg.mdict_exe_path = parent / f"mdict{suffix}"
+    cfg.rapidgzip_exe_path = parent / f"rapidgzip{suffix}"
+    for path in [cfg.mdict_exe_path, cfg.rapidgzip_exe_path]:
+        if not path.exists():
+            tmp = str(path)
+            print(f"{tmp} is not found!")
+            cfg.dont_do_it = True
+
+    if cfg.dont_do_it:
+        return
+
     if not cfg.index_gzip_path.exists():
         start = time.perf_counter()
         print()

@@ -53,18 +53,6 @@ parser.add_argument(
     default=r"D:\result",
     help="Path to directory for output files",
 )
-parser.add_argument(
-    "--rapidgzip",
-    type=Path,
-    default=r"C:\Users\Akira\anaconda3\Scripts\rapidgzip.exe",
-    help="Path to rapidgzip executable",
-)
-parser.add_argument(
-    "--mdict",
-    type=Path,
-    default=r"C:\Users\Akira\anaconda3\Scripts\mdict.exe",
-    help="Path to mdict executable",
-)
 args = parser.parse_args()
 
 # The number of ndjson files processed in a batch is equal to nCore*nChunk
@@ -81,8 +69,6 @@ def main():
         buffer_size=args.bufsize,
         input_dir=Path(args.input_dir),
         output_dir=Path(args.output_dir),
-        rapidgzip_exe_path=Path(args.rapidgzip),
-        mdict_exe_path=Path(args.mdict),
     )
 
     initial_setup(cfg)

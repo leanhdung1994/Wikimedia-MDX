@@ -37,6 +37,9 @@ def writer_loop(cfg: Config, queue: Queue, n_tasks: int):
 def process_parallel(cfg: Config, delete_log=False) -> None:
     if cfg.mdx_path.is_file():
         print(f"The file {cfg.mdx_path.name} already exists!")
+        cfg.dont_do_it = True
+
+    if cfg.dont_do_it:
         return
 
     if cfg.debug:
@@ -87,10 +90,10 @@ def process_parallel(cfg: Config, delete_log=False) -> None:
             cfg.progress_log["acc_run_time"],
             "minutes",
         )
-        cfg.dont_do_it = False
         if delete_log:
             cfg.progress_log_path.unlink(missing_ok=True)
     else:
         print(
             "There are ndjson files remained to process, so you need to re-run the script"
         )
+        cfg.dont_do_it = True
