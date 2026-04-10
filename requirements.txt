@@ -2,7 +2,5 @@ selectolax
 indexed-gzip
 orjson
 rapidgzip
-xxhash
 duckdb
-deflate
-git+https://github.com/leanhdung1994/mdict-utils.git
+mdict-utils
