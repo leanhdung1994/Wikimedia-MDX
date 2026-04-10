@@ -10,7 +10,7 @@ from txt_and_modules_collector import collect_txt_and_modules
 CORE_UTILIZATION = 0.7
 RESERVED_CORES = 4
 cores = max(
-    1, os.cpu_count() - RESERVED_CORES, round(CORE_UTILIZATION * os.cpu_count())
+    1, min(os.cpu_count() - RESERVED_CORES, round(CORE_UTILIZATION * os.cpu_count()))
 )
 
 parser = argparse.ArgumentParser()
