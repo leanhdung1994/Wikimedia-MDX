@@ -10,7 +10,7 @@ Processes the full English Wikipedia dump — roughly 500 GB of uncompressed HTM
 - **Multi-language support** – English (`en`) and French (`fr`) out of the box; easily extensible
 - **Parallel processing** – distributes work across CPU cores via Python `multiprocessing`
 - **Efficient decompression** – uses `indexed-gzip` + `rapidgzip` to seek directly into large `.gz` archives without full extraction
-- **DuckDB-backed intermediate storage** – chunked Parquet files are deduped and merged with DuckDB for low memory overhead
+- **DuckDB-backed intermediate storage** – binned NDJSON files are deduped and merged with DuckDB for low memory overhead
 - **MDX output** – produces `.mdx`, `.css`, `.js`, and module files consumable by MDict-compatible readers
 
 Note: Due to the large size of the resulted MDict txt, it is advised to use this multithreaded [version](https://github.com/leanhdung1994/mdict-utils) of `mdict-utils`.
