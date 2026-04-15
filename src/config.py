@@ -1,13 +1,5 @@
-from multiprocessing import Pool
 from pathlib import Path
-from selectolax.lexbor import LexborHTMLParser  # Fast C-based HTML parser
-import indexed_gzip as igzip  # Random-access reads into gzip streams
-from contextlib import ExitStack
-from itertools import chain
 from dataclasses import dataclass
-from urllib.parse import urljoin
-from multiprocessing import Queue
-import json, tarfile, time, string, orjson, traceback, requests, rapidgzip, os, subprocess, argparse, shutil, duckdb, atexit, psutil, threading, sys
 
 
 @dataclass()

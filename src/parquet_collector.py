@@ -1,4 +1,7 @@
-from config import *
+from config import Config
+import psutil
+import time
+import duckdb
 
 
 def collect_parquet(cfg: Config, delete_ndjson=True) -> None:

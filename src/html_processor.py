@@ -1,4 +1,6 @@
-from config import *
+from config import Config
+from selectolax.lexbor import LexborHTMLParser
+import string
 
 # CSS selectors that control which DOM nodes are removed during HTML cleaning.
 CSS_selectors = {

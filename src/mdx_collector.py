@@ -1,4 +1,5 @@
-from config import *
+from config import Config
+import subprocess
 
 
 def collect_mdx(cfg: Config, delete_txt=True) -> None:

@@ -1,4 +1,9 @@
-from config import *
+from config import Config
+from pathlib import Path
+from urllib.parse import urljoin
+import duckdb
+import requests
+import time
 
 headers = {
     "Accept-Encoding": "gzip, deflate, sdch",

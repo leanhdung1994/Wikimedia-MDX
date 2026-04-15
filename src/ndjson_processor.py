@@ -1,5 +1,12 @@
-from config import *
+from config import Config
 from html_processor import HtmlFactory
+from multiprocessing import Queue
+import indexed_gzip as igzip
+import tarfile
+import atexit
+import time
+import orjson
+import traceback
 
 
 class NdjsonFactory:

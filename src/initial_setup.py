@@ -1,4 +1,11 @@
-from config import *
+from config import Config
+from pathlib import Path
+import indexed_gzip as igzip
+import subprocess
+import sys
+import orjson
+import tarfile
+import time
 
 
 def initial_setup(cfg: Config) -> None:
@@ -22,7 +29,9 @@ def initial_setup(cfg: Config) -> None:
 
     exe = Path(sys.executable).resolve()
     # If already inside Scripts/bin, use parent directly, otherwise append it
-    parent = exe.parent if exe.parent.name in ("Scripts", "bin") else exe.parent / scripts
+    parent = (
+        exe.parent if exe.parent.name in ("Scripts", "bin") else exe.parent / scripts
+    )
 
     cfg.mdict_exe_path = parent / f"mdict{suffix}"
     cfg.rapidgzip_exe_path = parent / f"rapidgzip{suffix}"
@@ -76,9 +85,12 @@ def initial_setup(cfg: Config) -> None:
             ndjson_names = [k for k in list(progress_log.keys()) if ".ndjson" in k]
     else:
         # Open the .tar.gz via the seek-index to list all ndjson member names.
-        with igzip.IndexedGzipFile(
-            cfg.tar_path, index_file=cfg.index_gzip_path
-        ) as myGzip, tarfile.open(fileobj=myGzip, mode="r:*") as tarFile:
+        with (
+            igzip.IndexedGzipFile(
+                cfg.tar_path, index_file=cfg.index_gzip_path
+            ) as myGzip,
+            tarfile.open(fileobj=myGzip, mode="r:*") as tarFile,
+        ):
             ndjson_names = tarFile.getnames()
             if cfg.debug:
                 ndjson_names = ndjson_names[: cfg.n_cores]  # 2 shards in debug mode

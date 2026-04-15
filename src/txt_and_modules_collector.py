@@ -1,4 +1,8 @@
-from config import *
+from config import Config
+import psutil
+import time
+import duckdb
+import shutil
 
 
 def collect_txt_and_modules(cfg: Config, delete_parquet=True) -> None:
