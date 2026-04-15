@@ -19,7 +19,11 @@ def initial_setup(cfg: Config) -> None:
     # Locate platform-appropriate executables inside the current Python environment.
     scripts = "Scripts" if sys.platform == "win32" else "bin"
     suffix = ".exe" if sys.platform == "win32" else ""
-    parent = Path(sys.executable).parent / scripts
+
+    exe = Path(sys.executable).resolve()
+    # If already inside Scripts/bin, use parent directly, otherwise append it
+    parent = exe.parent if exe.parent.name in ("Scripts", "bin") else exe.parent / scripts
+
     cfg.mdict_exe_path = parent / f"mdict{suffix}"
     cfg.rapidgzip_exe_path = parent / f"rapidgzip{suffix}"
 

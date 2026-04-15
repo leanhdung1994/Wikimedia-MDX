@@ -1,6 +1,0 @@
-selectolax
-indexed-gzip
-orjson
-rapidgzip
-duckdb
-mdict-utils

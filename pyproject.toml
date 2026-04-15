@@ -1,0 +1,19 @@
+[project]
+name = "wikimedia-mdx"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "duckdb>=1.5.2",
+    "indexed-gzip>=1.10.3",
+    "mdict-utils",
+    "orjson>=3.11.8",
+    "psutil>=7.2.2",
+    "rapidgzip>=0.16.0",
+    "requests>=2.33.1",
+    "selectolax>=0.4.7",
+]
+
+[tool.uv.sources]
+mdict-utils = { git = "https://github.com/leanhdung1994/mdict-utils.git" }
