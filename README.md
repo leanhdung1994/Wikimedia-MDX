@@ -1,28 +1,18 @@
 # Wikipedia / Wiktionary Dump Processor
 
-A pipeline that converts Wikipedia and Wiktionary `.tar.gz` dumps into
-[MDX](https://www.mdict.cn/) dictionary files. Processes the English Wikipedia
-dump (roughly 500 GB of uncompressed HTML) in around 5 hours on a 16-core laptop
-with 32 GB RAM (including ~130 minutes for HTML processing and ~100 minutes for
-dedup).
+A pipeline that converts Wikipedia and Wiktionary `.tar.gz` dumps into [MDX](https://www.mdict.cn/) dictionary files.
+Processes the English Wikipedia dump (roughly 500 GB of uncompressed HTML) in around 5 hours on a 16-core laptop with 32 GB RAM (including ~130 minutes for HTML processing and ~100 minutes for dedup).
 
 ## Features
 
-- **Multi-project support** -- works with `wiki` (Wikipedia) and `wiktionary`
-  (Wiktionary) dumps
-- **Multi-language support** -- English (`en`) and French (`fr`) out of the box;
-  easily extensible
-- **Parallel processing** -- distributes work across CPU cores via Python
-  `multiprocessing`
-- **Efficient decompression** -- uses `indexed-gzip` + `rapidgzip` to seek
-  directly into large `.gz` archives
-- **DuckDB-backed intermediate storage** -- binned NDJSON files are deduped and
-  merged with DuckDB
+- **Multi-project support** -- works with `wiki` (Wikipedia) and `wiktionary` (Wiktionary) dumps
+- **Multi-language support** -- English (`en`) and French (`fr`) out of the box; easily extensible
+- **Parallel processing** -- distributes work across CPU cores via Python `multiprocessing`
+- **Efficient decompression** -- uses `indexed-gzip` + `rapidgzip` to seek directly into large `.gz` archives
+- **DuckDB-backed intermediate storage** -- binned NDJSON files are deduped and merged with DuckDB
 - **MDX output** -- produces `.mdx`, `.css` and `.js`
 
-Note: Due to the large size of the resulted MDict txt, it is advised to use this
-multithreaded [version](https://github.com/leanhdung1994/mdict-utils) of
-`mdict-utils`.
+Note: Due to the large size of the resulted MDict txt, it is advised to use this multithreaded [version](https://github.com/leanhdung1994/mdict-utils) of `mdict-utils`.
 
 ## Screenshots
 
@@ -117,36 +107,29 @@ src/
 
 ### Zero-extraction parallel I/O
 
-Workers never decompress the full `.tar.gz` archive to disk. Instead,
-`initial_setup.py` builds a seek index once using `rapidgzip`, and each worker
-process opens the archive via `indexed-gzip`, jumping straight to its assigned
-NDJSON member by byte offset.
+Workers never decompress the full `.tar.gz` archive to disk.
+Instead, `initial_setup.py` builds a seek index once using `rapidgzip`, and each worker process opens the archive via `indexed-gzip`, jumping straight to its assigned NDJSON member by byte offset.
 
 --------------------------------------------------------------------------------
 
 ### Producer / consumer paradigm
 
-The worker pool and the disk writer run on completely separate threads. Workers
-push `(bin, data, size, status)` tuples into a `Queue(maxsize=n_cores × 4)`; a
-single dedicated writer thread drains it and handles all disk I/O.
+The worker pool and the disk writer run on completely separate threads.
+Workers push `(bin, data, size, status)` tuples into a `Queue(maxsize=n_cores × 4)`; a single dedicated writer thread drains it and handles all disk I/O.
 
 --------------------------------------------------------------------------------
 
 ### Hash-based binning dedup
 
-Every parsed entry is routed to a bin by `identifier % n_bins`. Because entries
-with the same `identifier` always land in the same bin, the deduplication (keep
-only the most recent `dateModified` per article) runs independently on each bin
-with zero cross-bin coordination.
+Every parsed entry is routed to a bin by `identifier % n_bins`.
+Because entries with the same `identifier` always land in the same bin, the deduplication (keep only the most recent `dateModified` per article) runs independently on each bin with zero cross-bin coordination.
 
 --------------------------------------------------------------------------------
 
 ### In-memory write buffering
 
-The writer maintains a separate byte buffer for each bin and only flushes to
-disk when the per-bin threshold (`buffer_size / n_bins`) is exceeded. This
-converts millions of tiny per-entry writes into a large sequential appends per
-bin.
+The writer maintains a separate byte buffer for each bin and only flushes to disk when the per-bin threshold (`buffer_size / n_bins`) is exceeded.
+This converts millions of tiny per-entry writes into a large sequential appends per bin.
 
 --------------------------------------------------------------------------------
 
@@ -162,21 +145,19 @@ All merging, dedup, and export are delegated to DuckDB that handles:
 
 ### Resumable processing
 
-After each batch, the pipeline writes a JSON log that records which NDJSON files
-have been processed. On restart, already-completed files are skipped
-automatically.
+After each batch, the pipeline writes a JSON log that records which NDJSON files have been processed.
+On restart, already-completed files are skipped automatically.
 
 --------------------------------------------------------------------------------
 
 ### Fault tolerance and debug mode
 
-Individual entry failures never stall the pipeline. Each entry is processed
-inside a `try/except`; any exception is printed, and the raw JSON line is
-collected. The `--debug` flag processes the first 2 NDJSON files, making it fast
-to validate the full pipeline on a small slice of real data.
+Individual entry failures never stall the pipeline.
+Each entry is processed inside a `try/except`; any exception is printed, and the raw JSON line is collected.
+The `--debug` flag processes the first 2 NDJSON files, making it fast to validate the full pipeline on a small slice of real data.
 
 --------------------------------------------------------------------------------
 
 ## Acknowledgement
 
-Many thanks to LE Quynh Anh for encouragement and support.
+Many thanks to LE Quynh Anh for her encouragement and support.
